@@ -24,7 +24,7 @@ private:
 	};
 	bool(*cmp)(const T& a, const T& b);
 	uint32_t root, pool_ptr;
-	node pool[N + 1];
+	node* pool;
 	bool h_update;
 	/// <summary>
 	/// left rotate on pool[subtree] and update it
@@ -131,6 +131,7 @@ private:
 public:
 	avl(bool(*cmp)(const T& a, const T& b))
 		: cmp(cmp), root(0), pool_ptr(1), h_update(true) {
+		pool = new node[N + 1];
 		for (size_t i = 0; i <= N; i++)
 			pool[i] = node();
 	}
@@ -139,9 +140,11 @@ public:
 	~avl() {
 		_height_check(root);
 		//_size_check(root);
+		delete[] pool;
 	}
 #else
 	~avl() {
+		delete[] pool;
 	}
 #endif
 
