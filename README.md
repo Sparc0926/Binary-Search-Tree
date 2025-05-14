@@ -24,6 +24,11 @@ Definition
 
 <body></body>
 
+Before writing the code, there are several lemmas that make it easier.
+
+Lemma
+: Before a neccessary ***left rotation***, $h_{r}(b)\geq h_{l}(b)\geq h_{l}(a)$.
+
 ```cpp
 void l_rotate(uint32_t& a_i) {
 	uint32_t b_i = pool[a_i].r_subtree;
