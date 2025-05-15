@@ -1,0 +1,6 @@
+.vs/
+.git/
+bin/
+interm/
+.vcsproj.filters
+.vcsproj.user
