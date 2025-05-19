@@ -13,26 +13,26 @@ template <class T, size_t N> class avl {
 private:
 	struct node {
 		node()
-			: l_height(0), r_height(0), l_subtree(0), r_subtree(0), l_size(0), r_size(0) {
+			: lHeight(0), rHeight(0), lSubtree(0), rSubtree(0), lSize(0), rSize(0) {
 		}
 		~node() {
 		}
 		T value;
-		uint32_t l_height, r_height;
-		uint32_t l_subtree, r_subtree;
-		uint32_t l_size, r_size;
+		uint32_t lHeight, rHeight;
+		uint32_t lSubtree, rSubtree;
+		uint32_t lSize, rSize;
 	};
 	bool(*cmp)(const T& a, const T& b);
 	uint32_t root, pool_ptr;
 	node* pool;
-	bool h_update;
+	bool hUpdate;
 	/// <summary>
 	/// left rotate on pool[subtree] and update it
 	/// </summary>
 	/// <param name="a_i"> index in pool[N] of subtree root to be modified </param>
 	void l_rotate(uint32_t& a_i) {
-		uint32_t b_i = pool[a_i].r_subtree;
-		pool[a_i].r_subtree = pool[b_i].l_subtree;
+		uint32_t b_i = pool[a_i].rSubtree;
+		pool[a_i].rSubtree = pool[b_i].lSubtree;
 		pool[b_i].l_subtree = a_i;
 		pool[a_i].r_height = pool[b_i].l_height;
 		pool[b_i].l_height = pool[a_i].l_height + 1;
@@ -64,38 +64,38 @@ private:
 		node& r = pool[p_root];
 		if (cmp(p_vaule, r.value)) {    // push to left subtree
 			_push(r.l_subtree, p_vaule);
-			if (h_update == false)  return;
+			if (hUpdate == false)  return;
 			if (r.l_height < r.r_height) {
 				r.l_height++;
-				h_update = false;  // doesn't affect parent height
+				hUpdate = false;  // doesn't affect parent height
 			}
 			else if (r.l_height == r.r_height) {
 				r.l_height++;
-				h_update = true;
+				hUpdate = true;
 			}
 			else {			   // left heavy
 				if (pool[r.l_subtree].r_height > pool[r.l_subtree].l_height)
 					avl::l_rotate(r.l_subtree);
 				avl::r_rotate(p_root);
-				h_update = false;  // no height contribution after once rotation
+				hUpdate = false;  // no height contribution after once rotation
 			}
 		}
 		else {                         // push to right subtree
 			_push(r.r_subtree, p_vaule);
-			if (h_update == false)  return;
+			if (hUpdate == false)  return;
 			if (r.r_height < r.l_height) {
 				r.r_height++;
-				h_update = false;  // doesn't affect parent height
+				hUpdate = false;  // doesn't affect parent height
 			}
 			else if (r.r_height == r.l_height) {
 				r.r_height++;
-				h_update = true;
+				hUpdate = true;
 			}
 			else {             // right heavy
 				if (pool[r.r_subtree].l_height > pool[r.r_subtree].r_height)
 					avl::r_rotate(r.r_subtree);
 				avl::l_rotate(p_root);
-				h_update = false;  // no height contribution after once rotation
+				hUpdate = false;  // no height contribution after once rotation
 			}
 		}
 	}
@@ -130,7 +130,7 @@ private:
 #endif
 public:
 	avl(bool(*cmp)(const T& a, const T& b))
-		: cmp(cmp), root(0), pool_ptr(1), h_update(true) {
+		: cmp(cmp), root(0), pool_ptr(1), hUpdate(true) {
 		pool = new node[N + 1];
 		for (size_t i = 0; i <= N; i++)
 			pool[i] = node();
@@ -149,7 +149,7 @@ public:
 #endif
 
 	void push(const T& p_value) {
-		h_update = true;
+		hUpdate = true;
 		_push(root, p_value);
 	}
 

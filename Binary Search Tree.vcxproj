@@ -211,7 +211,8 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\avl_tree.h" />
+    <ClInclude Include="include\AVLTree.h" />
+    <ClInclude Include="include\TwoThreeTree.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
