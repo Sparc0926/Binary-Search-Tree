@@ -30,24 +30,24 @@ private:
 	/// left rotate on pool[subtree] and update it
 	/// </summary>
 	/// <param name="a_i"> index in pool[N] of subtree root to be modified </param>
-	void l_rotate(uint32_t& a_i) {
+	void lRotate(uint32_t& a_i) {
 		uint32_t b_i = pool[a_i].rSubtree;
 		pool[a_i].rSubtree = pool[b_i].lSubtree;
-		pool[b_i].l_subtree = a_i;
-		pool[a_i].r_height = pool[b_i].l_height;
-		pool[b_i].l_height = pool[a_i].l_height + 1;
+		pool[b_i].lSubtree = a_i;
+		pool[a_i].rHeight = pool[b_i].lHeight;
+		pool[b_i].lHeight = pool[a_i].lHeight + 1;
 		a_i = b_i;
 	}
 	/// <summary>
 	/// right rotate on pool[subtree] and update it
 	/// </summary>
 	/// <param name="a_i"> index in pool[N] of subtree root to be modified </param>
-	void r_rotate(uint32_t& a_i) {
-		uint32_t b_i = pool[a_i].l_subtree;
-		pool[a_i].l_subtree = pool[b_i].r_subtree;
-		pool[b_i].r_subtree = a_i;
-		pool[a_i].l_height = pool[b_i].r_height++;
-		pool[b_i].r_height = pool[a_i].r_height + 1;
+	void rRotate(uint32_t& a_i) {
+		uint32_t b_i = pool[a_i].lSubtree;
+		pool[a_i].lSubtree = pool[b_i].rSubtree;
+		pool[b_i].rSubtree = a_i;
+		pool[a_i].lHeight = pool[b_i].rHeight++;
+		pool[b_i].rHeight = pool[a_i].rHeight + 1;
 		a_i = b_i;
 	}
 	/// <summary>
@@ -56,74 +56,74 @@ private:
 	/// <param name="root"> p[root] is the root of specified subtree </param>
 	/// <param name="rotated"> indicates whether or not any more height update </param>
 	/// <param name="target"> value to be pushed </param>
-	void _push(uint32_t& p_root, const T& p_vaule) {
+	void push(uint32_t& p_root, const T& p_vaule) {
 		if (!p_root) {
 			pool[p_root = pool_ptr++].value = p_vaule;
 			return;
 		}
 		node& r = pool[p_root];
 		if (cmp(p_vaule, r.value)) {    // push to left subtree
-			_push(r.l_subtree, p_vaule);
+			push(r.lSubtree, p_vaule);
 			if (hUpdate == false)  return;
-			if (r.l_height < r.r_height) {
-				r.l_height++;
+			if (r.lHeight < r.rHeight) {
+				r.lHeight++;
 				hUpdate = false;  // doesn't affect parent height
 			}
-			else if (r.l_height == r.r_height) {
-				r.l_height++;
+			else if (r.lHeight == r.rHeight) {
+				r.lHeight++;
 				hUpdate = true;
 			}
 			else {			   // left heavy
-				if (pool[r.l_subtree].r_height > pool[r.l_subtree].l_height)
-					avl::l_rotate(r.l_subtree);
-				avl::r_rotate(p_root);
+				if (pool[r.lSubtree].rHeight > pool[r.lSubtree].lHeight)
+					avl::lRotate(r.lSubtree);
+				avl::rRotate(p_root);
 				hUpdate = false;  // no height contribution after once rotation
 			}
 		}
 		else {                         // push to right subtree
-			_push(r.r_subtree, p_vaule);
+			push(r.rSubtree, p_vaule);
 			if (hUpdate == false)  return;
-			if (r.r_height < r.l_height) {
-				r.r_height++;
+			if (r.rHeight < r.lHeight) {
+				r.rHeight++;
 				hUpdate = false;  // doesn't affect parent height
 			}
-			else if (r.r_height == r.l_height) {
-				r.r_height++;
+			else if (r.rHeight == r.lHeight) {
+				r.rHeight++;
 				hUpdate = true;
 			}
 			else {             // right heavy
-				if (pool[r.r_subtree].l_height > pool[r.r_subtree].r_height)
-					avl::r_rotate(r.r_subtree);
-				avl::l_rotate(p_root);
+				if (pool[r.rSubtree].lHeight > pool[r.rSubtree].rHeight)
+					avl::rRotate(r.rSubtree);
+				avl::lRotate(p_root);
 				hUpdate = false;  // no height contribution after once rotation
 			}
 		}
 	}
 #ifdef TEST
-	uint32_t _height_check(uint32_t p_root) {
+	uint32_t heightCheck(uint32_t p_root) {
 		int max = 0;
-		if (pool[p_root].l_subtree) {
-			max = _height_check(pool[p_root].l_subtree) + 1;
-			assert(pool[p_root].l_height == max);
+		if (pool[p_root].lSubtree) {
+			max = heightCheck(pool[p_root].lSubtree) + 1;
+			assert(pool[p_root].lHeight == max);
 		}
-		if (pool[p_root].r_subtree) {
-			int rh = _height_check(pool[p_root].r_subtree) + 1;
+		if (pool[p_root].rSubtree) {
+			int rh = heightCheck(pool[p_root].rSubtree) + 1;
 			max = rh > max ? rh : max;
-			assert(pool[p_root].r_height == rh);
+			assert(pool[p_root].rHeight == rh);
 		}
 		return max;
 	}
 
-	uint32_t _size_check(uint32_t p_root) {
+	uint32_t sizeCheck(uint32_t p_root) {
 		int size = 0;
-		if (pool[p_root].l_subtree) {
-			size = _size_check(pool[p_root].l_subtree) + 1;
-			assert(pool[p_root].l_size == size);
+		if (pool[p_root].lSubtree) {
+			size = sizeCheck(pool[p_root].lSubtree) + 1;
+			assert(pool[p_root].lSize == size);
 		}
-		if (pool[p_root].r_subtree) {
-			int rs = _size_check(pool[p_root].r_subtree) + 1;
+		if (pool[p_root].rSubtree) {
+			int rs = sizeCheck(pool[p_root].rSubtree) + 1;
 			size += rs;
-			assert(pool[p_root].r_size == rs);
+			assert(pool[p_root].rSize == rs);
 		}
 		return size;
 	}
@@ -138,8 +138,8 @@ public:
 
 #ifdef TEST
 	~avl() {
-		_height_check(root);
-		//_size_check(root);
+		heightCheck(root);
+		//sizeCheck(root);
 		delete[] pool;
 	}
 #else
@@ -148,36 +148,28 @@ public:
 	}
 #endif
 
-	void push(const T& p_value) {
+	void Push(const T& p_value) {
 		hUpdate = true;
-		_push(root, p_value);
+		push(root, p_value);
 	}
-
+	
+	void Pop(T& p_value) {
+		
+	}
+	
+	T& At(uint32_t p_index) const {
+		
+	}
+	
 	void operator<<(const T& p_value) {
-		push(p_value);
+		Push(p_value);
 	}
-
-	void pop(T& p_value) {
-		uint32_t rt = root;
-		while (pool[rt].value != p_value) {
-			if (cmp(p_value, pool[rt].value)) {
-				rt = pool[rt].l_subtree;
-			}
-			else {
-				rt = pool[rt].r_subtree;
-			}
-		}
-	}
-
+	
 	void operator>>(T& p_value) {
-		pop(p_value);
+		Pop(p_value);
 	}
 
-	T& at(uint32_t index) const {
-
-	}
-
-	T& operator[](uint32_t index) {
-		return at(index);
+	T& operator[](uint32_t p_index) {
+		return At(p_index);
 	}
 };
