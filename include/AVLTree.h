@@ -21,9 +21,14 @@ private:
 		uint32_t lHeight, rHeight;
 		uint32_t lSubtree, rSubtree;
 		uint32_t lSize, rSize;
+
+		void operator=(const T& p_value) {
+			value = p_value;
+		}
 	};
 	bool(*cmp)(const T& a, const T& b);
-	uint32_t root, pool_s;
+	uint32_t root_i;
+	uint32_t pool_s;
 	node* pool;
 	bool hShouldUpdate;
 	/// <summary>
@@ -56,12 +61,12 @@ private:
 	/// <param name="root"> p[root] is the root of specified subtree </param>
 	/// <param name="rotated"> indicates whether or not any more height update </param>
 	/// <param name="target"> value to be pushed </param>
-	void push(uint32_t& p_root, const T& p_vaule) {
-		if (!p_root) {
-			pool[p_root = pool_s++].value = p_vaule;
+	void push(uint32_t& p_root_i, const T& p_vaule) {
+		if (!p_root_i) {
+			pool[p_root_i = pool_s++].value = p_vaule;
 			return;
 		}
-		node& r = pool[p_root];
+		node& r = pool[p_root_i];
 		if (cmp(p_vaule, r.value)) {    // push to left subtree
 			push(r.lSubtree, p_vaule);
 			if (hShouldUpdate == false)  return;
@@ -76,7 +81,7 @@ private:
 			else {			   // left heavy
 				if (pool[r.lSubtree].rHeight > pool[r.lSubtree].lHeight)
 					avl::lRotate(r.lSubtree);
-				avl::rRotate(p_root);
+				avl::rRotate(p_root_i);
 				hShouldUpdate = false;  // no height contribution after once rotation
 			}
 		}
@@ -94,52 +99,52 @@ private:
 			else {             // right heavy
 				if (pool[r.rSubtree].lHeight > pool[r.rSubtree].rHeight)
 					avl::rRotate(r.rSubtree);
-				avl::lRotate(p_root);
+				avl::lRotate(p_root_i);
 				hShouldUpdate = false;  // no height contribution after once rotation
 			}
 		}
 	}
 #ifdef TEST
-	uint32_t heightCheck(uint32_t p_root) {
+	uint32_t heightCheck(uint32_t p_root_i) {
 		int max = 0;
-		if (pool[p_root].lSubtree) {
-			max = heightCheck(pool[p_root].lSubtree) + 1;
-			assert(pool[p_root].lHeight == max);
+		if (pool[p_root_i].lSubtree) {
+			max = heightCheck(pool[p_root_i].lSubtree) + 1;
+			assert(pool[p_root_i].lHeight == max);
 		}
-		if (pool[p_root].rSubtree) {
-			int rh = heightCheck(pool[p_root].rSubtree) + 1;
+		if (pool[p_root_i].rSubtree) {
+			int rh = heightCheck(pool[p_root_i].rSubtree) + 1;
 			max = rh > max ? rh : max;
-			assert(pool[p_root].rHeight == rh);
+			assert(pool[p_root_i].rHeight == rh);
 		}
 		return max;
 	}
 
-	uint32_t sizeCheck(uint32_t p_root) {
+	uint32_t sizeCheck(uint32_t p_root_i) {
 		int size = 0;
-		if (pool[p_root].lSubtree) {
-			size = sizeCheck(pool[p_root].lSubtree) + 1;
-			assert(pool[p_root].lSize == size);
+		if (pool[p_root_i].lSubtree) {
+			size = sizeCheck(pool[p_root_i].lSubtree) + 1;
+			assert(pool[p_root_i].lSize == size);
 		}
-		if (pool[p_root].rSubtree) {
-			int rs = sizeCheck(pool[p_root].rSubtree) + 1;
+		if (pool[p_root_i].rSubtree) {
+			int rs = sizeCheck(pool[p_root_i].rSubtree) + 1;
 			size += rs;
-			assert(pool[p_root].rSize == rs);
+			assert(pool[p_root_i].rSize == rs);
 		}
 		return size;
 	}
 #endif
 public:
 	avl(bool(*cmp)(const T& a, const T& b))
-		: cmp(cmp), root(0), pool_s(1), hUpdate(true) {
-		pool = new node[N + 1];
-		for (size_t i = 0; i <= N; i++)
+		: cmp(cmp), root_i(0), pool_s(1), hShouldUpdate(true) {
+		pool = new node[Size() + 1];
+		for (size_t i = 0; i <= Size(); i++)
 			pool[i] = node();
 	}
 
 #ifdef TEST
 	~avl() {
-		heightCheck(root);
-		//sizeCheck(root);
+		heightCheck(root_i);
+		//sizeCheck(root_i);
 		delete[] pool;
 	}
 #else
@@ -149,16 +154,26 @@ public:
 #endif
 
 	void Push(const T& p_value) {
-		hUpdate = true;
-		push(root, p_value);
+		hShouldUpdate = true;
+		push(root_i, p_value);
 	}
 	
 	void Pop(T& p_value) {
+		uint32_t tarNode_i = root_i;
+		while (pool[tarNode_i].value != p_value) {
+			if (cmp(pool[tarNode_i].value, p_value))
+				tarNode_i = pool[tarNode_i].lSubtree;
+			else  tarNode_i = pool[tarNode_i].rSubtree;
+		}
 		
 	}
 	
 	T& At(uint32_t p_index) const {
 		
+	}
+
+	consteval size_t Size() {
+		return N;
 	}
 	
 	void operator<<(const T& p_value) {
