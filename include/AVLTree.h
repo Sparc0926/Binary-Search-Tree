@@ -23,9 +23,9 @@ private:
 		uint32_t lSize, rSize;
 	};
 	bool(*cmp)(const T& a, const T& b);
-	uint32_t root, pool_ptr;
+	uint32_t root, pool_s;
 	node* pool;
-	bool hUpdate;
+	bool hShouldUpdate;
 	/// <summary>
 	/// left rotate on pool[subtree] and update it
 	/// </summary>
@@ -58,44 +58,44 @@ private:
 	/// <param name="target"> value to be pushed </param>
 	void push(uint32_t& p_root, const T& p_vaule) {
 		if (!p_root) {
-			pool[p_root = pool_ptr++].value = p_vaule;
+			pool[p_root = pool_s++].value = p_vaule;
 			return;
 		}
 		node& r = pool[p_root];
 		if (cmp(p_vaule, r.value)) {    // push to left subtree
 			push(r.lSubtree, p_vaule);
-			if (hUpdate == false)  return;
+			if (hShouldUpdate == false)  return;
 			if (r.lHeight < r.rHeight) {
 				r.lHeight++;
-				hUpdate = false;  // doesn't affect parent height
+				hShouldUpdate = false;  // doesn't affect parent height
 			}
 			else if (r.lHeight == r.rHeight) {
 				r.lHeight++;
-				hUpdate = true;
+				hShouldUpdate = true;
 			}
 			else {			   // left heavy
 				if (pool[r.lSubtree].rHeight > pool[r.lSubtree].lHeight)
 					avl::lRotate(r.lSubtree);
 				avl::rRotate(p_root);
-				hUpdate = false;  // no height contribution after once rotation
+				hShouldUpdate = false;  // no height contribution after once rotation
 			}
 		}
 		else {                         // push to right subtree
 			push(r.rSubtree, p_vaule);
-			if (hUpdate == false)  return;
+			if (hShouldUpdate == false)  return;
 			if (r.rHeight < r.lHeight) {
 				r.rHeight++;
-				hUpdate = false;  // doesn't affect parent height
+				hShouldUpdate = false;  // doesn't affect parent height
 			}
 			else if (r.rHeight == r.lHeight) {
 				r.rHeight++;
-				hUpdate = true;
+				hShouldUpdate = true;
 			}
 			else {             // right heavy
 				if (pool[r.rSubtree].lHeight > pool[r.rSubtree].rHeight)
 					avl::rRotate(r.rSubtree);
 				avl::lRotate(p_root);
-				hUpdate = false;  // no height contribution after once rotation
+				hShouldUpdate = false;  // no height contribution after once rotation
 			}
 		}
 	}
@@ -130,7 +130,7 @@ private:
 #endif
 public:
 	avl(bool(*cmp)(const T& a, const T& b))
-		: cmp(cmp), root(0), pool_ptr(1), hUpdate(true) {
+		: cmp(cmp), root(0), pool_s(1), hUpdate(true) {
 		pool = new node[N + 1];
 		for (size_t i = 0; i <= N; i++)
 			pool[i] = node();
